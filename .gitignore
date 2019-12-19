@@ -1,4 +1,5 @@
 /.idea
+/azure-functions-core-tools
 /target
 /*.iml
 /local.settings.json

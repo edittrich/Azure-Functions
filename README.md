@@ -1,13 +1,13 @@
 # Links  
 [Function Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local)    
-[Sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-event-hub-cosmos-db)
+[Sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-event-hub-cosmos-db)  
 
 # Install Function Core Tools  
-npm install -g azure-functions-core-tools
+npm install -g azure-functions-core-tools  
 
 # Login  
 az login  
-az account set --subscription edittrich
+az account set --subscription edittrich  
 
 # Variables  
 RESOURCE_GROUP=edittrich-data  
@@ -17,12 +17,12 @@ EVENT_HUB_AUTHORIZATION_RULE=edittrich-data-eh-ar
 COSMOS_DB_ACCOUNT=edittrich-data-cd-ac  
 STORAGE_ACCOUNT=edittrichdatastac  
 FUNCTION_APP=edittrich-data-fa  
-LOCATION=westeurope
+LOCATION=westeurope  
 
 # Resource Group  
 az group create \  
     --name $RESOURCE_GROUP \  
-    --location $LOCATION
+    --location $LOCATION  
 
 # Event Hub  
 az eventhubs namespace create \  
@@ -38,7 +38,7 @@ az eventhubs eventhub authorization-rule create \
     --name $EVENT_HUB_AUTHORIZATION_RULE \  
     --eventhub-name $EVENT_HUB_NAME \  
     --namespace-name $EVENT_HUB_NAMESPACE \  
-    --rights Listen Send
+    --rights Listen Send  
 
 # Cosmos DB	  
 az cosmosdb create \  
@@ -53,21 +53,21 @@ az cosmosdb collection create \
     --name $COSMOS_DB_ACCOUNT \  
     --collection-name TelemetryInfo \  
     --db-name TelemetryDb \  
-    --partition-key-path '/temperatureStatus'
+    --partition-key-path '/temperatureStatus'  
 
-# Storage Account	  
+# Storage Account  
 az storage account create \  
     --resource-group $RESOURCE_GROUP \  
     --name $STORAGE_ACCOUNT \  
-    --sku Standard_LRS
+    --sku Standard_LRS  
 
-# Function App	  
+# Function App  
 az functionapp create \  
     --resource-group $RESOURCE_GROUP \  
     --name $FUNCTION_APP \  
     --storage-account $STORAGE_ACCOUNT \  
     --consumption-plan-location $LOCATION \  
-    --runtime java
+    --runtime java  
 
 # Connection Strings  
 AZURE_WEB_JOBS_STORAGE=$( \  
@@ -92,7 +92,7 @@ COSMOS_DB_CONNECTION_STRING=$( \
         --type connection-strings \  
         --query connectionStrings[0].connectionString \  
         --output tsv)  
-echo $COSMOS_DB_CONNECTION_STRING
+echo $COSMOS_DB_CONNECTION_STRING  
 
 # Function App Settings  
 az functionapp config appsettings set \  
@@ -101,29 +101,26 @@ az functionapp config appsettings set \
     --settings \  
         AzureWebJobsStorage=$AZURE_WEB_JOBS_STORAGE \  
         EventHubConnectionString=$EVENT_HUB_CONNECTION_STRING \  
-        CosmosDBConnectionString=$COSMOS_DB_CONNECTION_STRING
+        CosmosDBConnectionString=$COSMOS_DB_CONNECTION_STRING  
 
 # Maven  
+cd /mnt/d/Documents/Workspaces/Git/Azure/  
 mvn archetype:generate --batch-mode \  
     -DarchetypeGroupId=com.microsoft.azure \  
     -DarchetypeArtifactId=azure-functions-archetype \  
     -DappName=$FUNCTION_APP \  
     -DresourceGroup=$RESOURCE_GROUP \  
     -DgroupId=de.edittrich.azure \  
-    -DartifactId=functions
-
-mvn archetype:generate --batch-mode -DarchetypeGroupId=com.microsoft.azure -DarchetypeArtifactId=azure-functions-archetype -DappName=edittrich-data-fa -DresourceGroup=edittrich-data -DgroupId=de.edittrich.azure -DartifactId=functions
+    -DartifactId=functions  
 
 # Function App Settings Local  
 cd functions  
-func azure functionapp fetch-app-settings $FUNCTION_APP
-
-func azure functionapp fetch-app-settings edittrich-data-fa
+func azure functionapp fetch-app-settings $FUNCTION_APP  
 
 # Build, run locally and deploy to Azure  
 mvn clean package  
 mvn azure-functions:run  
-mvn azure-functions:deploy
+mvn azure-functions:deploy  
 
 # Delete  
 az group delete --name $RESOURCE_GROUP  
